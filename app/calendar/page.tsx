@@ -2,6 +2,8 @@ import { getCalendarEvents } from '@/lib/google-sheets';
 import Navbar from '@/components/Navbar';
 import CalendarComponent from '@/components/CalendarComponent';
 
+export const dynamic = 'force-dynamic';
+
 export default async function CalendarPage() {
   const events = await getCalendarEvents();
 

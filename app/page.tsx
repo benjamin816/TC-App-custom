@@ -4,6 +4,8 @@ import Navbar from '@/components/Navbar';
 import { Filter, Search } from 'lucide-react';
 import { Transaction } from '@/lib/google-sheets';
 
+export const dynamic = 'force-dynamic';
+
 export default async function DashboardPage() {
   let transactions: Transaction[] = [];
   let error: string | null = null;

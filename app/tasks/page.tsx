@@ -4,6 +4,8 @@ import TaskList from '@/components/TaskList';
 import { isAfter, isBefore, addDays, parseISO, isValid } from 'date-fns';
 import { Clock, AlertCircle, User } from 'lucide-react';
 
+export const dynamic = 'force-dynamic';
+
 function parseTaskDate(value: string): Date | null {
   if (!value) return null;
   const date = parseISO(value);
