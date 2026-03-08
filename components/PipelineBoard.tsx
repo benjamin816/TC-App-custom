@@ -3,103 +3,150 @@
 import { Transaction } from '@/lib/google-sheets';
 import Link from 'next/link';
 import { motion } from 'motion/react';
-import { User, Calendar as CalendarIcon, ArrowRight, PlusCircle } from 'lucide-react';
+import { useState, useTransition } from 'react';
+import { User, Calendar as CalendarIcon, ArrowRight, PlusCircle, GripVertical } from 'lucide-react';
+import { updateTransactionStatusAction } from '@/app/actions/transactions';
+import { BoardStatus, normalizeTransactionStatus } from '@/lib/google-sheets';
 
-const STAGES = [
-  'DepositsPending',
-  'DueDiligence',
-  'BuilderActive',
-  'Financing',
-  'ClearToClose',
-  'Closed'
-] as const;
-
-const STAGE_LABELS: Record<string, string> = {
-  DepositsPending: 'Deposits Pending',
-  DueDiligence: 'Due Diligence',
-  BuilderActive: 'Builder Active',
-  Financing: 'Financing',
-  ClearToClose: 'Clear to Close',
-  Closed: 'Closed'
-};
+const STAGES: { key: BoardStatus; label: string }[] = [
+  { key: 'InitialUC', label: 'Initial UC' },
+  { key: 'DueDiligencePeriod', label: 'Due Diligence Period' },
+  { key: 'PostDD', label: 'Post DD' },
+  { key: 'ClearToClose', label: 'Clear to Close' },
+  { key: 'Closed', label: 'Closed' },
+];
 
 export default function PipelineBoard({ transactions }: { transactions: Transaction[] }) {
-  if (transactions.length === 0) {
-    return (
-      <div className="bg-white border border-stone-200 rounded-2xl p-10 text-center shadow-sm">
-        <h2 className="font-serif italic text-2xl text-stone-900 mb-2">No transactions yet</h2>
-        <p className="text-stone-500 mb-6">Create your first intake to populate the pipeline board.</p>
-        <Link
-          href="/transactions/new"
-          className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-emerald-600 text-white font-medium hover:bg-emerald-700 transition-colors"
-        >
-          <PlusCircle className="w-4 h-4" />
-          New Intake
-        </Link>
-      </div>
+  const [items, setItems] = useState(
+    transactions.map((t) => ({ ...t, Status: normalizeTransactionStatus(t.Status) }))
+  );
+  const [draggingId, setDraggingId] = useState<string | null>(null);
+  const [pending, startTransition] = useTransition();
+
+  function moveCard(transactionId: string, nextStatus: BoardStatus) {
+    const current = items.find((item) => item.TransactionID === transactionId);
+    if (!current || current.Status === nextStatus) return;
+
+    const previousStatus = current.Status;
+    setItems((prev) =>
+      prev.map((item) =>
+        item.TransactionID === transactionId ? { ...item, Status: nextStatus } : item
+      )
     );
+
+    startTransition(async () => {
+      try {
+        await updateTransactionStatusAction(transactionId, nextStatus);
+      } catch (error) {
+        console.error(error);
+        setItems((prev) =>
+          prev.map((item) =>
+            item.TransactionID === transactionId ? { ...item, Status: previousStatus } : item
+          )
+        );
+        alert('Failed to move card. Check Apps Script support for updateTransactionStatus.');
+      }
+    });
   }
 
   return (
-    <div className="flex gap-6 overflow-x-auto pb-8 min-h-[calc(100vh-200px)]">
-      {STAGES.map((stage) => {
-        const stageTransactions = transactions.filter(t => t.Status === stage);
-        
-        return (
-          <div key={stage} className="flex-shrink-0 w-80">
-            <div className="flex items-center justify-between mb-4 px-2">
-              <h3 className="font-serif italic text-lg text-stone-800">{STAGE_LABELS[stage]}</h3>
-              <span className="bg-stone-200 text-stone-600 text-xs font-bold px-2 py-0.5 rounded-full">
-                {stageTransactions.length}
-              </span>
-            </div>
-            
-            <div className="space-y-4">
-              {stageTransactions.map((t, index) => (
-                <motion.div
-                  key={t.TransactionID}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.05 }}
-                >
-                  <Link 
-                    href={`/transactions/${t.TransactionID}`}
-                    className="block bg-white border border-stone-200 p-4 rounded-xl shadow-sm hover:shadow-md hover:border-emerald-200 transition-all group"
+    <section
+      className="rounded-2xl overflow-hidden border border-stone-300 shadow-sm"
+      style={{
+        backgroundImage:
+          "linear-gradient(rgba(231,229,228,0.92), rgba(231,229,228,0.86)), url('https://picsum.photos/1600/800?grayscale')",
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+      }}
+    >
+      <header className="px-6 py-4 border-b border-stone-300/80 bg-stone-100/80 backdrop-blur-sm flex items-center justify-between">
+        <h2 className="text-lg font-bold text-stone-800">Contract to Close - Buyer</h2>
+        <span className="text-xs uppercase tracking-wider bg-white text-stone-600 border border-stone-300 px-2.5 py-1 rounded-full font-semibold">
+          {pending ? 'Syncing...' : 'Live Board'}
+        </span>
+      </header>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-3 p-3 min-h-[70vh]">
+        {STAGES.map((stage) => {
+          const stageTransactions = items.filter((t) => normalizeTransactionStatus(t.Status) === stage.key);
+
+          return (
+            <div
+              key={stage.key}
+              className="bg-white/85 backdrop-blur-sm rounded-xl border border-stone-300 p-3 h-fit"
+              onDragOver={(e) => e.preventDefault()}
+              onDrop={() => {
+                if (draggingId) moveCard(draggingId, stage.key);
+                setDraggingId(null);
+              }}
+            >
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="font-semibold text-stone-800">{stage.label}</h3>
+                <span className="text-xs bg-stone-200 text-stone-700 px-2 py-0.5 rounded-full font-semibold">
+                  {stageTransactions.length}
+                </span>
+              </div>
+
+              <div className="space-y-2 min-h-16">
+                {stageTransactions.map((t, index) => (
+                  <motion.div
+                    key={t.TransactionID}
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.03 }}
+                    draggable
+                    onDragStart={() => setDraggingId(t.TransactionID)}
+                    onDragEnd={() => setDraggingId(null)}
+                    className="rounded-lg border border-stone-200 bg-white shadow-sm"
                   >
-                    <div className="flex justify-between items-start mb-2">
-                      <span className={t.TransactionType === 'Resale' ? "text-[10px] font-bold uppercase tracking-widest text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded" : "text-[10px] font-bold uppercase tracking-widest text-orange-600 bg-orange-50 px-1.5 py-0.5 rounded"}>
-                        {t.TransactionType}
-                      </span>
-                      <ArrowRight className="w-4 h-4 text-stone-300 group-hover:text-emerald-500 transform group-hover:translate-x-1 transition-all" />
-                    </div>
-                    
-                    <h4 className="font-bold text-stone-900 mb-1 line-clamp-1">{t.Address}</h4>
-                    <p className="text-sm text-stone-500 mb-4 flex items-center gap-1">
-                      <User className="w-3 h-3" /> {t.ClientNames}
-                    </p>
-                    
-                    <div className="flex items-center justify-between pt-3 border-t border-stone-100">
-                      <div className="flex items-center gap-1 text-xs text-stone-400">
-                        <CalendarIcon className="w-3 h-3" />
-                        <span>Closing: {t.ClosingDate}</span>
+                    <Link href={`/transactions/${t.TransactionID}`} className="block p-3">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest">
+                          <span
+                            className={
+                              t.TransactionType === 'Resale'
+                                ? 'text-blue-700 bg-blue-100 px-1.5 py-0.5 rounded'
+                                : 'text-orange-700 bg-orange-100 px-1.5 py-0.5 rounded'
+                            }
+                          >
+                            {t.TransactionType}
+                          </span>
+                        </div>
+                        <GripVertical className="w-4 h-4 text-stone-300" />
                       </div>
-                      <div className="text-xs font-bold text-stone-700">
-                        ${Number(t.PurchasePrice).toLocaleString()}
+
+                      <h4 className="font-semibold text-sm text-stone-900 line-clamp-1 mb-1">{t.Address}</h4>
+                      <p className="text-xs text-stone-500 flex items-center gap-1 mb-3 line-clamp-1">
+                        <User className="w-3 h-3" />
+                        {t.ClientNames}
+                      </p>
+
+                      <div className="flex items-center justify-between border-t border-stone-100 pt-2">
+                        <span className="text-[11px] text-stone-500 flex items-center gap-1">
+                          <CalendarIcon className="w-3 h-3" />
+                          {t.ClosingDate || 'No close date'}
+                        </span>
+                        <span className="text-[11px] font-semibold text-stone-700">
+                          ${Number(t.PurchasePrice || 0).toLocaleString()}
+                        </span>
                       </div>
-                    </div>
-                  </Link>
-                </motion.div>
-              ))}
-              
-              {stageTransactions.length === 0 && (
-                <div className="border-2 border-dashed border-stone-200 rounded-xl p-8 text-center">
-                  <p className="text-xs text-stone-400 italic">No transactions</p>
-                </div>
-              )}
+                    </Link>
+                  </motion.div>
+                ))}
+
+                <Link
+                  href={`/transactions/new?stage=${stage.key}`}
+                  className="flex items-center gap-2 text-sm text-stone-600 hover:text-emerald-700 px-2 py-2 rounded-lg hover:bg-stone-100/90 transition-colors"
+                >
+                  <PlusCircle className="w-4 h-4" />
+                  Add a card
+                  <ArrowRight className="w-3.5 h-3.5 ml-auto text-stone-400" />
+                </Link>
+              </div>
             </div>
-          </div>
-        );
-      })}
-    </div>
+          );
+        })}
+      </div>
+    </section>
   );
 }

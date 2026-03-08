@@ -5,6 +5,8 @@ import {
   addTasks, 
   addCalendarEvents, 
   updateTaskStatus,
+  updateTransactionStatus,
+  BOARD_STATUSES,
   Transaction, 
   Task, 
   CalendarEvent 
@@ -27,6 +29,7 @@ const transactionInputSchema = z
     EMAmount: z.coerce.number().min(0).default(0),
     BuilderDepositAmount: z.coerce.number().min(0).default(0),
     AssignedTo: z.enum(['TC', 'Admin']).default('TC'),
+    InitialStatus: z.enum(BOARD_STATUSES).default('InitialUC'),
     Notes: z.string().max(5000).optional().default(''),
     EMHolder: z.string().max(255).optional().default(''),
   })
@@ -52,6 +55,11 @@ const updateTaskStatusSchema = z.object({
   status: z.enum(['NotStarted', 'Waiting', 'Done']),
 });
 
+const updateTransactionStatusSchema = z.object({
+  transactionId: z.string().trim().min(1),
+  status: z.enum(BOARD_STATUSES),
+});
+
 export async function createTransaction(formData: FormData) {
   const parsed = transactionInputSchema.safeParse({
     ClientNames: formData.get('ClientNames'),
@@ -65,6 +73,7 @@ export async function createTransaction(formData: FormData) {
     EMAmount: formData.get('EMAmount') || 0,
     BuilderDepositAmount: formData.get('BuilderDepositAmount') || 0,
     AssignedTo: formData.get('AssignedTo') || 'TC',
+    InitialStatus: formData.get('InitialStatus') || 'InitialUC',
     Notes: formData.get('Notes') || '',
     EMHolder: formData.get('EMHolder') || '',
   });
@@ -81,7 +90,7 @@ export async function createTransaction(formData: FormData) {
     ClientNames: input.ClientNames,
     Address: input.Address,
     TransactionType: input.TransactionType,
-    Status: 'DepositsPending',
+    Status: input.InitialStatus,
     EffectiveDate: input.EffectiveDate,
     DDDeadlineDate: input.DDDeadlineDate,
     ClosingDate: input.ClosingDate,
@@ -186,4 +195,15 @@ export async function updateTaskStatusAction(taskId: string, status: any) {
 
   await updateTaskStatus(parsed.data.taskId, parsed.data.status);
   revalidatePath('/transactions/[id]', 'page');
+}
+
+export async function updateTransactionStatusAction(transactionId: string, status: unknown) {
+  const parsed = updateTransactionStatusSchema.safeParse({ transactionId, status });
+  if (!parsed.success) {
+    throw new Error('Invalid transaction status update');
+  }
+
+  await updateTransactionStatus(parsed.data.transactionId, parsed.data.status);
+  revalidatePath('/');
+  revalidatePath(`/transactions/${parsed.data.transactionId}`);
 }

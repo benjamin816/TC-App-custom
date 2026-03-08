@@ -1,6 +1,16 @@
 const APPS_SCRIPT_WEB_APP_URL = process.env.APPS_SCRIPT_WEB_APP_URL || '';
 const APPS_SCRIPT_API_KEY = process.env.APPS_SCRIPT_API_KEY || '';
 
+export const BOARD_STATUSES = [
+  'InitialUC',
+  'DueDiligencePeriod',
+  'PostDD',
+  'ClearToClose',
+  'Closed',
+] as const;
+
+export type BoardStatus = (typeof BOARD_STATUSES)[number];
+
 type AppsScriptResponse<T> = {
   ok: boolean;
   data?: T;
@@ -73,7 +83,11 @@ export const CALENDAR_HEADERS = [
 ];
 
 export async function getTransactions(): Promise<Transaction[]> {
-  return appsScriptRequest<Transaction[]>('getTransactions', undefined, 'GET');
+  const transactions = await appsScriptRequest<Transaction[]>('getTransactions', undefined, 'GET');
+  return transactions.map((t) => ({
+    ...t,
+    Status: normalizeTransactionStatus(t.Status),
+  }));
 }
 
 export async function getTasks(): Promise<Task[]> {
@@ -110,12 +124,27 @@ export async function updateTaskStatus(taskId: string, status: Task['Status']) {
   await appsScriptRequest<null>('updateTaskStatus', { taskId, status }, 'POST');
 }
 
+export async function updateTransactionStatus(transactionId: string, status: BoardStatus) {
+  await appsScriptRequest<null>('updateTransactionStatus', {
+    transactionId,
+    TransactionID: transactionId,
+    status,
+  }, 'POST');
+}
+
 export type Transaction = {
   TransactionID: string;
   ClientNames: string;
   Address: string;
   TransactionType: 'Resale' | 'NewConstruction';
-  Status: 'DepositsPending' | 'DueDiligence' | 'BuilderActive' | 'Financing' | 'ClearToClose' | 'Closed' | 'Terminated' | 'Archived';
+  Status:
+    | BoardStatus
+    | 'DepositsPending'
+    | 'DueDiligence'
+    | 'BuilderActive'
+    | 'Financing'
+    | 'Terminated'
+    | 'Archived';
   EffectiveDate: string;
   DDDeadlineDate: string;
   ClosingDate: string;
@@ -171,4 +200,27 @@ export function mapObjectsToRows<T>(objects: T[], headers: string[]): any[][] {
   return objects.map(obj => {
     return headers.map(header => (obj as any)[header] || '');
   });
+}
+
+export function normalizeTransactionStatus(status: string): BoardStatus {
+  switch (status) {
+    case 'InitialUC':
+    case 'DueDiligencePeriod':
+    case 'PostDD':
+    case 'ClearToClose':
+    case 'Closed':
+      return status;
+    case 'DepositsPending':
+      return 'InitialUC';
+    case 'DueDiligence':
+      return 'DueDiligencePeriod';
+    case 'BuilderActive':
+    case 'Financing':
+      return 'PostDD';
+    case 'Terminated':
+    case 'Archived':
+      return 'Closed';
+    default:
+      return 'InitialUC';
+  }
 }

@@ -1,7 +1,6 @@
 import { getTransactions } from '@/lib/google-sheets';
 import PipelineBoard from '@/components/PipelineBoard';
 import Navbar from '@/components/Navbar';
-import { Filter, Search } from 'lucide-react';
 import { Transaction } from '@/lib/google-sheets';
 
 export const dynamic = 'force-dynamic';
@@ -22,27 +21,12 @@ export default async function DashboardPage() {
       <Navbar />
       
       <main className="flex-1 p-8 max-w-[1600px] mx-auto w-full">
-        <header className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+        <header className="mb-6">
           <div>
-            <h1 className="text-3xl font-serif italic tracking-tight text-stone-900">Pipeline</h1>
-            <p className="text-stone-500 text-sm">Manage your active real estate transactions.</p>
+            <h1 className="text-3xl font-serif italic tracking-tight text-stone-900">Contract to Close</h1>
+            <p className="text-stone-500 text-sm">Drag cards across board stages from contract to close.</p>
           </div>
-          
-          <div className="flex items-center gap-3">
-            <div className="relative">
-              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" />
-              <input 
-                type="text" 
-                placeholder="Search address or client..." 
-                className="pl-9 pr-4 py-2 bg-white border border-stone-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all w-64"
-              />
-            </div>
-            <button className="flex items-center gap-2 px-4 py-2 bg-white border border-stone-200 rounded-lg text-sm font-medium text-stone-700 hover:bg-stone-50 transition-colors">
-              <Filter className="w-4 h-4" />
-              Filter
-            </button>
-          </div>
-        </header>
+        </header>        
 
         {error ? (
           <div className="bg-red-50 border border-red-200 text-red-700 p-6 rounded-2xl">

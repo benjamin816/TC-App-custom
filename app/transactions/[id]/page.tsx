@@ -14,6 +14,21 @@ import {
 
 export const dynamic = 'force-dynamic';
 
+function formatStatus(status: string) {
+  switch (status) {
+    case 'InitialUC':
+      return 'Initial UC';
+    case 'DueDiligencePeriod':
+      return 'Due Diligence Period';
+    case 'PostDD':
+      return 'Post DD';
+    case 'ClearToClose':
+      return 'Clear to Close';
+    default:
+      return status;
+  }
+}
+
 export default async function TransactionDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const transaction = await getTransactionById(id);
@@ -36,7 +51,7 @@ export default async function TransactionDetailPage({ params }: { params: Promis
                 {transaction.TransactionType}
               </span>
               <span className="text-xs font-bold uppercase tracking-widest text-emerald-600 bg-emerald-50 px-2 py-1 rounded">
-                {transaction.Status}
+                {formatStatus(transaction.Status)}
               </span>
             </div>
             <h1 className="text-4xl font-serif italic tracking-tight text-stone-900">{transaction.Address}</h1>

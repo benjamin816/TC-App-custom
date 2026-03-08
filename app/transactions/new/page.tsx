@@ -2,12 +2,21 @@
 
 import { createTransaction } from '@/app/actions/transactions';
 import Navbar from '@/components/Navbar';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Home, User, DollarSign, Calendar, FileText, ArrowRight, Loader2 } from 'lucide-react';
 
 export default function NewTransactionPage() {
   const [type, setType] = useState<'Resale' | 'NewConstruction'>('Resale');
   const [isPending, setIsPending] = useState(false);
+  const [initialStage, setInitialStage] = useState('InitialUC');
+
+  useEffect(() => {
+    const selectedStage = new URLSearchParams(window.location.search).get('stage') || 'InitialUC';
+    const validStage = ['InitialUC', 'DueDiligencePeriod', 'PostDD', 'ClearToClose', 'Closed'].includes(selectedStage)
+      ? selectedStage
+      : 'InitialUC';
+    setInitialStage(validStage);
+  }, []);
 
   async function handleSubmit(formData: FormData) {
     setIsPending(true);
@@ -27,9 +36,11 @@ export default function NewTransactionPage() {
         <header className="mb-10">
           <h1 className="text-4xl font-serif italic tracking-tight text-stone-900 mb-2">New Intake</h1>
           <p className="text-stone-500">Enter transaction details to start the coordination process.</p>
+          <p className="text-xs text-stone-400 mt-2">Initial board stage: {initialStage}</p>
         </header>
 
         <form action={handleSubmit} className="space-y-8">
+          <input type="hidden" name="InitialStatus" value={initialStage} />
           {/* Transaction Type Selection */}
           <section className="bg-white p-8 rounded-2xl border border-stone-200 shadow-sm">
             <h2 className="text-sm font-bold uppercase tracking-widest text-stone-400 mb-6 flex items-center gap-2">
