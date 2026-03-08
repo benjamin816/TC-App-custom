@@ -1,33 +1,10 @@
 import { getTransactions } from '@/lib/google-sheets';
 import PipelineBoard from '@/components/PipelineBoard';
 import Navbar from '@/components/Navbar';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
-import { LayoutDashboard, Filter, Search } from 'lucide-react';
+import { Filter, Search } from 'lucide-react';
 import { Transaction } from '@/lib/google-sheets';
 
 export default async function DashboardPage() {
-  const session = await getServerSession(authOptions);
-
-  if (!session) {
-    return (
-      <div className="min-h-screen flex flex-col">
-        <Navbar />
-        <main className="flex-1 flex items-center justify-center p-6">
-          <div className="max-w-md w-full text-center space-y-6">
-            <div className="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-3xl flex items-center justify-center mx-auto">
-              <LayoutDashboard className="w-10 h-10" />
-            </div>
-            <div className="space-y-2">
-              <h1 className="text-3xl font-serif italic tracking-tight text-stone-900">Welcome to RE-Sync</h1>
-              <p className="text-stone-500">Please sign in with your Google account to access your transaction pipeline.</p>
-            </div>
-          </div>
-        </main>
-      </div>
-    );
-  }
-
   let transactions: Transaction[] = [];
   let error: string | null = null;
 
@@ -69,7 +46,7 @@ export default async function DashboardPage() {
           <div className="bg-red-50 border border-red-200 text-red-700 p-6 rounded-2xl">
             <h2 className="font-bold mb-2">Error connecting to Google Sheets</h2>
             <p className="text-sm">{error}</p>
-            <p className="text-sm mt-4">Make sure you have set the <code className="bg-red-100 px-1 rounded">GOOGLE_SHEET_ID</code> environment variable and that your account has access to the sheet.</p>
+            <p className="text-sm mt-4">Check your <code className="bg-red-100 px-1 rounded">APPS_SCRIPT_WEB_APP_URL</code> and Apps Script deployment permissions.</p>
           </div>
         ) : (
           <PipelineBoard transactions={transactions} />

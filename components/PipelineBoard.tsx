@@ -3,7 +3,7 @@
 import { Transaction } from '@/lib/google-sheets';
 import Link from 'next/link';
 import { motion } from 'motion/react';
-import { User, Calendar as CalendarIcon, ArrowRight } from 'lucide-react';
+import { User, Calendar as CalendarIcon, ArrowRight, PlusCircle } from 'lucide-react';
 
 const STAGES = [
   'DepositsPending',
@@ -24,6 +24,22 @@ const STAGE_LABELS: Record<string, string> = {
 };
 
 export default function PipelineBoard({ transactions }: { transactions: Transaction[] }) {
+  if (transactions.length === 0) {
+    return (
+      <div className="bg-white border border-stone-200 rounded-2xl p-10 text-center shadow-sm">
+        <h2 className="font-serif italic text-2xl text-stone-900 mb-2">No transactions yet</h2>
+        <p className="text-stone-500 mb-6">Create your first intake to populate the pipeline board.</p>
+        <Link
+          href="/transactions/new"
+          className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-emerald-600 text-white font-medium hover:bg-emerald-700 transition-colors"
+        >
+          <PlusCircle className="w-4 h-4" />
+          New Intake
+        </Link>
+      </div>
+    );
+  }
+
   return (
     <div className="flex gap-6 overflow-x-auto pb-8 min-h-[calc(100vh-200px)]">
       {STAGES.map((stage) => {

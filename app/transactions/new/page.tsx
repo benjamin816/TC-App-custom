@@ -4,10 +4,8 @@ import { createTransaction } from '@/app/actions/transactions';
 import Navbar from '@/components/Navbar';
 import { useState } from 'react';
 import { Home, User, DollarSign, Calendar, FileText, ArrowRight, Loader2 } from 'lucide-react';
-import { useSession } from 'next-auth/react';
 
 export default function NewTransactionPage() {
-  const { data: session } = useSession();
   const [type, setType] = useState<'Resale' | 'NewConstruction'>('Resale');
   const [isPending, setIsPending] = useState(false);
 
@@ -25,12 +23,6 @@ export default function NewTransactionPage() {
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
-      {!session ? (
-        <main className="flex-1 flex items-center justify-center p-6">
-          <p className="text-stone-500">Please sign in to create a transaction.</p>
-        </main>
-      ) : (
-      
       <main className="flex-1 p-8 max-w-4xl mx-auto w-full">
         <header className="mb-10">
           <h1 className="text-4xl font-serif italic tracking-tight text-stone-900 mb-2">New Intake</h1>
@@ -187,7 +179,6 @@ export default function NewTransactionPage() {
           </footer>
         </form>
       </main>
-      )}
     </div>
   );
 }

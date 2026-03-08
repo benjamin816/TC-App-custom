@@ -2,8 +2,6 @@ import { getTransactionById, getTasksByTransactionId } from '@/lib/google-sheets
 import Navbar from '@/components/Navbar';
 import TaskList from '@/components/TaskList';
 import { notFound } from 'next/navigation';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
 import { 
   User, 
   DollarSign, 
@@ -15,19 +13,6 @@ import {
 } from 'lucide-react';
 
 export default async function TransactionDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const session = await getServerSession(authOptions);
-
-  if (!session) {
-    return (
-      <div className="min-h-screen flex flex-col">
-        <Navbar />
-        <main className="flex-1 flex items-center justify-center p-6">
-          <p className="text-stone-500">Please sign in to view transaction details.</p>
-        </main>
-      </div>
-    );
-  }
-
   const { id } = await params;
   const transaction = await getTransactionById(id);
   

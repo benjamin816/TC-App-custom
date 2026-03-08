@@ -1,23 +1,8 @@
 import { getCalendarEvents } from '@/lib/google-sheets';
 import Navbar from '@/components/Navbar';
 import CalendarComponent from '@/components/CalendarComponent';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
 
 export default async function CalendarPage() {
-  const session = await getServerSession(authOptions);
-
-  if (!session) {
-    return (
-      <div className="min-h-screen flex flex-col">
-        <Navbar />
-        <main className="flex-1 flex items-center justify-center p-6">
-          <p className="text-stone-500">Please sign in to view the calendar.</p>
-        </main>
-      </div>
-    );
-  }
-
   const events = await getCalendarEvents();
 
   return (

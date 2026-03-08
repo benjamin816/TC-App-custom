@@ -3,8 +3,6 @@ import Navbar from '@/components/Navbar';
 import TaskList from '@/components/TaskList';
 import { isAfter, isBefore, addDays, parseISO, isValid } from 'date-fns';
 import { Clock, AlertCircle, User } from 'lucide-react';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
 
 function parseTaskDate(value: string): Date | null {
   if (!value) return null;
@@ -13,19 +11,6 @@ function parseTaskDate(value: string): Date | null {
 }
 
 export default async function TasksPage() {
-  const session = await getServerSession(authOptions);
-
-  if (!session) {
-    return (
-      <div className="min-h-screen flex flex-col">
-        <Navbar />
-        <main className="flex-1 flex items-center justify-center p-6">
-          <p className="text-stone-500">Please sign in to view tasks.</p>
-        </main>
-      </div>
-    );
-  }
-
   const tasks = await getTasks();
   
   const now = new Date();
