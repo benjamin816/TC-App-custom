@@ -1,0 +1,29 @@
+import type {NextConfig} from 'next';
+
+const nextConfig: NextConfig = {
+  reactStrictMode: true,
+  env: {
+    // Inject NEXTAUTH_URL from APP_URL if not explicitly set
+    NEXTAUTH_URL: process.env.NEXTAUTH_URL || (process.env.APP_URL && process.env.APP_URL !== 'MY_APP_URL' ? process.env.APP_URL : ''),
+  },
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+  typescript: {
+    ignoreBuildErrors: false,
+  },
+  // Allow access to remote image placeholder.
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'picsum.photos',
+        port: '',
+        pathname: '/**', // This allows any path under the hostname
+      },
+    ],
+  },
+  output: 'standalone',
+};
+
+export default nextConfig;
