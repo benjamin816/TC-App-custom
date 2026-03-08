@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Contract to Close Board</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="topbar-inner">
+        <h1>Contract to Close - Buyer</h1>
+        <div class="topbar-actions">
+          <button id="settingsBtn" class="ghost-btn" type="button">Settings</button>
+          <button id="newCardBtn" class="solid-btn" type="button">Add Card</button>
+        </div>
+      </div>
+      <p class="subtext">Apps Script powered transaction board</p>
+    </header>
+
+    <main class="board-wrap">
+      <section id="board" class="board" aria-label="Contract to Close board"></section>
+    </main>
+
+    <dialog id="cardDialog" class="dialog">
+      <form id="cardForm" class="dialog-form" method="dialog">
+        <h2>New Transaction Card</h2>
+        <div class="grid">
+          <label>
+            Client Names
+            <input name="ClientNames" required />
+          </label>
+          <label>
+            Address
+            <input name="Address" required />
+          </label>
+          <label>
+            Type
+            <select name="TransactionType">
+              <option value="Resale">Resale</option>
+              <option value="NewConstruction">New Construction</option>
+            </select>
+          </label>
+          <label>
+            Stage
+            <select name="Status" id="statusSelect"></select>
+          </label>
+          <label>
+            Effective Date
+            <input name="EffectiveDate" type="date" required />
+          </label>
+          <label>
+            DD Deadline (Resale)
+            <input name="DDDeadlineDate" type="date" />
+          </label>
+          <label>
+            Closing Date
+            <input name="ClosingDate" type="date" required />
+          </label>
+          <label>
+            Purchase Price
+            <input name="PurchasePrice" type="number" min="0" step="1" required />
+          </label>
+          <label>
+            DD Amount
+            <input name="DDAmount" type="number" min="0" step="1" />
+          </label>
+          <label>
+            EM Amount
+            <input name="EMAmount" type="number" min="0" step="1" />
+          </label>
+          <label>
+            Builder Deposit
+            <input name="BuilderDepositAmount" type="number" min="0" step="1" />
+          </label>
+          <label>
+            Assigned To
+            <select name="AssignedTo">
+              <option value="TC">TC</option>
+              <option value="Admin">Admin</option>
+            </select>
+          </label>
+          <label class="full">
+            Notes
+            <textarea name="Notes" rows="3"></textarea>
+          </label>
+        </div>
+        <menu class="menu">
+          <button value="cancel" type="button" class="ghost-btn" id="cancelCardBtn">Cancel</button>
+          <button value="default" type="submit" class="solid-btn">Save Card</button>
+        </menu>
+      </form>
+    </dialog>
+
+    <dialog id="settingsDialog" class="dialog">
+      <form id="settingsForm" class="dialog-form" method="dialog">
+        <h2>Board Settings</h2>
+        <label>
+          Apps Script Web App URL
+          <input id="appsScriptUrl" required />
+        </label>
+        <label>
+          API Key (optional)
+          <input id="appsScriptKey" />
+        </label>
+        <p class="hint">Saved in this browser only.</p>
+        <menu class="menu">
+          <button value="cancel" type="button" class="ghost-btn" id="cancelSettingsBtn">Cancel</button>
+          <button value="default" type="submit" class="solid-btn">Save Settings</button>
+        </menu>
+      </form>
+    </dialog>
+
+    <template id="columnTemplate">
+      <section class="column" data-status="">
+        <header class="column-head">
+          <h3></h3>
+          <span class="count"></span>
+        </header>
+        <div class="cards"></div>
+        <button type="button" class="add-card ghost-btn">+ Add a card</button>
+      </section>
+    </template>
+
+    <template id="cardTemplate">
+      <article class="card" draggable="true">
+        <div class="tag"></div>
+        <h4></h4>
+        <p class="client"></p>
+        <div class="meta">
+          <span class="close-date"></span>
+          <span class="price"></span>
+        </div>
+      </article>
+    </template>
+
+    <script src="./app.js" type="module"></script>
+  </body>
+</html>

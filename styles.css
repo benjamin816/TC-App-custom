@@ -1,0 +1,271 @@
+:root {
+  --bg: #d7dbe0;
+  --panel: #ffffffd9;
+  --panel-border: #d3d9df;
+  --text: #122033;
+  --muted: #5b6876;
+  --accent: #0c66e4;
+  --accent-strong: #094ec0;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  color: var(--text);
+  min-height: 100vh;
+  background:
+    linear-gradient(rgba(215, 219, 224, 0.87), rgba(215, 219, 224, 0.9)),
+    url("https://images.unsplash.com/photo-1549880338-65ddcdfd017b?auto=format&fit=crop&w=1600&q=80")
+      center / cover no-repeat fixed;
+}
+
+.topbar {
+  padding: 18px 22px 10px;
+}
+
+.topbar-inner {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+h1 {
+  margin: 0;
+  font-size: 1.4rem;
+}
+
+.subtext {
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
+.topbar-actions {
+  display: flex;
+  gap: 8px;
+}
+
+button {
+  border: 1px solid var(--panel-border);
+  border-radius: 8px;
+  cursor: pointer;
+  font: inherit;
+}
+
+.ghost-btn {
+  background: #ffffffd4;
+  color: #233143;
+  padding: 7px 12px;
+}
+
+.ghost-btn:hover {
+  background: #fff;
+}
+
+.solid-btn {
+  background: var(--accent);
+  color: white;
+  padding: 8px 13px;
+  border-color: #0055cc;
+}
+
+.solid-btn:hover {
+  background: var(--accent-strong);
+}
+
+.board-wrap {
+  padding: 8px 14px 20px;
+}
+
+.board {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(230px, 1fr));
+  gap: 10px;
+  align-items: start;
+}
+
+.column {
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: 11px;
+  padding: 10px;
+  min-height: 75vh;
+}
+
+.column.over {
+  outline: 2px dashed #7eb2ff;
+  outline-offset: 2px;
+}
+
+.column-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.column h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.count {
+  font-size: 0.75rem;
+  background: #e8edf2;
+  border-radius: 999px;
+  padding: 2px 8px;
+}
+
+.cards {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 30px;
+}
+
+.card {
+  background: #fff;
+  border-radius: 10px;
+  border: 1px solid #dde3ea;
+  padding: 10px;
+  box-shadow: 0 1px 2px #12203314;
+}
+
+.card:active {
+  cursor: grabbing;
+}
+
+.tag {
+  font-size: 0.65rem;
+  display: inline-block;
+  border-radius: 999px;
+  padding: 2px 8px;
+  margin-bottom: 7px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.tag.resale {
+  color: #114f8b;
+  background: #dcecff;
+}
+
+.tag.new {
+  color: #8a5100;
+  background: #ffe9cc;
+}
+
+.card h4 {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.client {
+  margin: 6px 0;
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+.meta {
+  border-top: 1px solid #edf1f4;
+  margin-top: 8px;
+  padding-top: 7px;
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  color: #30445a;
+  font-size: 0.78rem;
+}
+
+.add-card {
+  margin-top: 10px;
+  width: 100%;
+  text-align: left;
+}
+
+.dialog {
+  border: none;
+  border-radius: 12px;
+  width: min(860px, 96vw);
+  background: white;
+  box-shadow: 0 25px 60px #12203340;
+}
+
+.dialog::backdrop {
+  background: #09131f96;
+}
+
+.dialog-form {
+  padding: 14px;
+}
+
+.dialog-form h2 {
+  margin: 2px 0 14px;
+  font-size: 1.2rem;
+}
+
+label {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.82rem;
+  gap: 4px;
+}
+
+input,
+select,
+textarea {
+  font: inherit;
+  border: 1px solid #c8d2dd;
+  border-radius: 8px;
+  padding: 8px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.full {
+  grid-column: 1 / -1;
+}
+
+.menu {
+  margin: 14px 0 0;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 0;
+}
+
+.hint {
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+@media (max-width: 1100px) {
+  .board {
+    grid-template-columns: repeat(2, minmax(240px, 1fr));
+  }
+}
+
+@media (max-width: 680px) {
+  .board {
+    grid-template-columns: 1fr;
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .topbar-inner {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
